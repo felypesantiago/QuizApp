@@ -60,6 +60,7 @@ let Continue = ({show, onContinue}) =>
     }
   </div>
 
+
 let Footer = () => 
   <div id="footer" className="row">
     <div className="col-12">
@@ -68,6 +69,7 @@ let Footer = () =>
       </p>
     </div>
   </div>;
+
 
 let AuthorQuiz = ({turnData, highlight, onAnswerSelected, onContinue}) => 
     <div className="container-fluild">

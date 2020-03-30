@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
 import { BrowserRouter, Route, withRouter } from 'react-router-dom';
 
@@ -60,38 +60,41 @@ const authors = [
   }
 ];
 
-function getTurnData(authors) {
-  const allBooks = authors.reduce((acc, author) => acc.concat(author.books), []);
+const App = () => {
 
-  const fourRandomBooks = shuffle(allBooks).slice(0,4);
-  const answer = sample(fourRandomBooks);
-
-  return {
-    books: fourRandomBooks,
-    author: authors.find(author => author.books.some(book => book === answer))
+  const getTurnData = (authors) => {
+    const allBooks = authors.reduce((acc, author) => acc.concat(author.books), []);
+  
+    const fourRandomBooks = shuffle(allBooks).slice(0,4);
+    const answer = sample(fourRandomBooks);
+  
+    return {
+      books: fourRandomBooks,
+      author: authors.find(author => author.books.some(book => book === answer))
+    }
+  };
+  
+  const useGameState = () => {
+    const [turnData, setTurnData] = useState(getTurnData(authors));
+    const [highlight, setHighlight] = useState('');
+  
+    return {turnData, setTurnData, highlight, setHighlight};
   }
-};
+  
+  let gameState = useGameState();
+  
+  const onAnswerSelected = (answer) => {
+    const isCorrect = gameState.turnData.author.books.some(book => book === answer);
+  
+    gameState.setHighlight(isCorrect ? 'correct' : 'wrong');
+  }
+  
+  const resetState = () => {
+    gameState.setTurnData(getTurnData(authors));
+    gameState.setHighlight('');
+  }
 
-let state = {};
-
-function onAnswerSelected(answer) {
-  const isCorrect = state.turnData.author.books.some(book => book === answer);
-
-  state.highlight = isCorrect ? 'correct' : 'wrong';
-
-  render();
-}
-
-function resetState(){
-  state = { 
-    turnData: getTurnData(authors),
-    highlight: ''}
-
-    render();
-}
-
-function App() {
-  return <AuthorQuiz {...state} onAnswerSelected={onAnswerSelected} onContinue={() => resetState()}/>;
+  return <AuthorQuiz {...gameState} onAnswerSelected={onAnswerSelected} onContinue={() => resetState()}/>;
 }
 
 const AuthorWrapper = withRouter(({history}) => {
@@ -101,22 +104,17 @@ const AuthorWrapper = withRouter(({history}) => {
   } }/>;
 });
 
-function render() {
-  ReactDOM.render(
-    <React.StrictMode>
-      <BrowserRouter>
-        <>
-          <Route exact path="/" component={App}/>
-          <Route path="/add" component={AuthorWrapper}></Route>
-        </>
-      </BrowserRouter>
-    </React.StrictMode>,
-    document.getElementById('root')
-  );
-}
-
-resetState();
-
+ReactDOM.render(
+  <React.StrictMode>
+    <BrowserRouter>
+      <>
+        <Route exact path="/" component={App}/>
+        <Route path="/add" component={AuthorWrapper}></Route>
+      </>
+    </BrowserRouter>
+  </React.StrictMode>,
+  document.getElementById('root')
+);
 
 
 // If you want your app to work offline and load faster, you can change
